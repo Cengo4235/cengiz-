@@ -1,0 +1,22 @@
+function preprocessText(text) {
+  // Büyük/küçük harf dönüştürme
+  text = text.toLowerCase();
+  
+  // Noktalama işaretlerinin kaldırılması
+  text = text.replace(/[^\w\s]/gi, '');
+
+  // Sayıların kaldırılması
+  text = text.replace(/[0-9]/g, '');
+
+  // Stop-words'lerin kaldırılması
+  const stopWords = ["bir", "ve", "ya", "ama", "gibi"];
+  const words = text.split(' ').filter(word => !stopWords.includes(word));
+  text = words.join(' ');
+
+  // Lemmatization/Stemming
+  const stemmer = new TurkishStemmer();
+  words.map(word => stemmer.stem(word));
+  text = words.join(' ');
+
+  return text;
+}
