@@ -1,0 +1,41 @@
+const generator = tf.sequential();
+generator.add(tf.layers.dense({ units: 7 * 7 * 256, inputShape: [100] }));
+generator.add(tf.layers.reshape({ targetShape: [7, 7, 256] }));
+generator.add(tf.layers.conv2dTranspose({ filters: 128, kernelSize: 3, strides: 2, padding: 'same' }));
+generator.add(tf.layers.batchNormalization());
+generator.add(tf.layers.leakyReLU());
+generator.add(tf.layers.conv2dTranspose({ filters: 64, kernelSize: 3, strides: 1, padding: 'same' }));
+generator.add(tf.layers.batchNormalization());
+generator.add(tf.layers.leakyReLU());
+generator.add(tf.layers.conv2dTranspose({ filters: 1, kernelSize: 3, strides: 2, padding: 'same', activation: 'tanh' }));
+
+const discriminator = tf.sequential();
+discriminator.add(tf.layers.conv2d({ filters: 64, kernelSize: 3, strides: 2, padding: 'same', inputShape: [28, 28, 1] }));
+discriminator.add(tf.layers.leakyReLU());
+discriminator.add(tf.layers.conv2d({ filters: 128, kernelSize: 3, strides: 2, padding: 'same' }));
+discriminator.add(tf.layers.leakyReLU());
+discriminator.add(tf.layers.flatten());
+discriminator.add(tf.layers.dense({ units: 1 }));
+discriminator.compile({ optimizer: tf.train.adam(0.0002, 0.5), loss: 'binaryCrossentropy' });
+
+//Model eğitimi:
+const realData = tf.tensor(trainingData);
+for (let i = 0; i < epochs; i++) {
+  for (let j = 0; j < batches; j++) {
+    const fakeData = generator.predict(tf.randomNormal([batchSize, latentDim]));
+    const data = realData.slice([j * batchSize, 0, 0], [batchSize, 28, 28]).concat(fakeData);
+    const labels = tf.tensor2d(new Array(batchSize).fill([1, 0]).concat(new Array(batchSize).fill([0, 1])));
+
+    const d_loss = discriminator.trainOnBatch(data, labels);
+
+    const noise = tf.randomNormal([batchSize, latentDim]);
+    const g_loss = gan.trainOnBatch(noise, tf.ones([batchSize, 1]));
+
+    console.log(`Epoch ${i + 1}, Batch ${j + 1} D Loss: ${d_loss.toFixed(4)} G Loss: ${g_loss.toFixed(4)}`);
+  }
+}
+
+//Yeni görüntü üretimi
+const noise = tf.randomNormal([1, latentDim]);
+const image = generator.predict(noise);
+tf.browser.toPixels(image.reshape([28, 28]), canvas);
