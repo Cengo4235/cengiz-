@@ -1,0 +1,24 @@
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 32;
+canvas.height = 32;
+
+function generateRandomImage() {
+  ctx.fillStyle = '#000000'; // siyah arka plan
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 500 adet beyaz piksel oluştur
+  for (let i = 0; i < 500; i++) {
+    const x = Math.floor(Math.random() * canvas.width);
+    const y = Math.floor(Math.random() * canvas.height);
+    ctx.fillStyle = '#ffffff'; // beyaz renk
+    ctx.fillRect(x, y, 1, 1);
+  }
+}
+
+// İlk sayfa yüklendiğinde rasgele bir görüntü oluştur
+generateRandomImage();
+
+// Generate Image butonuna tıklandığında rasgele bir görüntü oluştur
+const generateButton = document.getElementById('generate-button');
+generateButton.addEventListener('click', generateRandomImage);
